@@ -30,7 +30,7 @@ io.on('connection', (socket) => {
       users.addUser(socket.id,params.name,params.room);
       io.to(params.room).emit('updateUserList',users.getUserList(params.room));
 
-      socket.emit('newMessage', generateMessage('ADMIN', 'Vishal Kumar welcomes you to the PMEC CLUB'));
+      // socket.emit('newMessage', generateMessage('ADMIN', 'Vishal Kumar welcomes you to the PMEC CLUB'));
 
       socket.broadcast.to(params.room).emit('newMessage', generateMessage('ADMIN', `${params.name} joined`));
 
