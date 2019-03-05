@@ -3,7 +3,7 @@ const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
 
-const {isRealString} = require('../server/utils/validation');
+const {isRealString,isRealMessage} = require('../server/utils/validation');
 const {Users} = require('./utils/users');
 const {generateMessage,generateLocationMessage} = require('./utils/message');
 const publicPath = path.join(__dirname, '../public');
@@ -37,13 +37,20 @@ io.on('connection', (socket) => {
      callback();
   });
   socket.on('createMessage', (message, callback) => {
-    console.log('createMessage', message);
-    io.emit('newMessage', generateMessage(message.from, message.text));
+    var user = users.getUser(socket.id);
+    if(user && isRealMessage(message.text)){
+      io.to(user.room).emit('newMessage', generateMessage(user.name, message.text));
+    }
+   
     callback();
   
   });
   socket.on('createLocationMessage',(coords)=>{
-    io.emit('newLocationMessage',generateLocationMessage('Admin',coords.latitude,coords.longitude));
+    var user = users.getUser(socket.id);
+    if(user){
+      io.to(user.room).emit('newLocationMessage',generateLocationMessage(user.name,coords.latitude,coords.longitude));
+    }
+    
   });
   socket.on('disconnect', () => {
     var user = users.removeUser(socket.id);
@@ -51,7 +58,7 @@ io.on('connection', (socket) => {
     if(user){
       io.to(user.room).emit('updateUserList',users.getUserList(user.room));
       io.to(user.room).emit('newMessage',generateMessage('ADMIN',`${user.name} left`));
-      
+
     }
   });
 });
