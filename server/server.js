@@ -22,7 +22,7 @@ io.on('connection', (socket) => {
 
   socket.on('join',(params,callback)=>{
      if(!isRealString(params.name) || !isRealString(params.room)){
-        callback('Name and Room name are required.');
+        callback('Name and Room name are required and should not be numbers.');
      }
       params.room = params.room.trim();
       socket.join(params.room);
